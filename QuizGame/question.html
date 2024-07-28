@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Game</title>
+    <style>
+        *{
+            color: chartreuse;
+            font-size: large;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            margin: 0;
+        }
+
+        #quiz-container {
+            background: rgb(30, 14, 153);
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #quiz-container h2 {
+            color:  wheat;
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn {
+            margin: 5px 0;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: rgb(255, 255, 255);
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: burlywood;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        #controls {
+            margin-top: 20px;
+        }
+
+        .correct {
+            background-color: white;
+        }
+
+        .wrong {
+            background-color: red;
+        }
+
+        .score-container {
+            margin-top: 20px;
+        }
+
+        #score {
+            font-size: 20px;
+            color: #0e92de;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h2>Quiz Game</h2>
+        <div id="question-container" class="hide">
+            <div id="question">Question text</div>
+            <div id="answer-buttons" class="btn-container">
+                <button class="btn">Answer 1</button>
+                <button class="btn">Answer 2</button>
+                <button class="btn">Answer 3</button>
+                <button class="btn">Answer 4</button>
+            </div>
+        </div>
+        <div id="controls">
+            <button id="start-btn" class="start-btn btn">Start</button>
+            <button id="next-btn" class="next-btn btn hide">Next</button>
+        </div>
+        <div id="score-container" class="hide">
+            <h2>Your Score: <span id="score"></span></h2>
+        </div>
+    </div>
+    <script>
+        const startButton = document.getElementById('start-btn');
+        const nextButton = document.getElementById('next-btn');
+        const questionContainerElement = document.getElementById('question-container');
+        const questionElement = document.getElementById('question');
+        const answerButtonsElement = document.getElementById('answer-buttons');
+        const scoreContainer = document.getElementById('score-container');
+        const scoreElement = document.getElementById('score');
+
+        let shuffledQuestions, currentQuestionIndex;
+        let score = 0;
+
+        startButton.addEventListener('click', startGame);
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+
+        function startGame() {
+            startButton.classList.add('hide');
+            scoreContainer.classList.add('hide');
+            shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+            currentQuestionIndex = 0;
+            score = 0;
+            questionContainerElement.classList.remove('hide');
+            setNextQuestion();
+        }
+
+        function setNextQuestion() {
+            resetState();
+            showQuestion(shuffledQuestions[currentQuestionIndex]);
+        }
+
+        function showQuestion(question) {
+            questionElement.innerText = question.question;
+            question.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsElement.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            clearStatusClass(document.body);
+            nextButton.classList.add('hide');
+            while (answerButtonsElement.firstChild) {
+                answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const correct = selectedButton.dataset.correct;
+            if (correct) {
+                score++;
+            }
+            setStatusClass(document.body, correct);
+            Array.from(answerButtonsElement.children).forEach(button => {
+                setStatusClass(button, button.dataset.correct);
+            });
+            if (shuffledQuestions.length > currentQuestionIndex + 1) {
+                nextButton.classList.remove('hide');
+            } else {
+                startButton.innerText = 'Restart';
+                startButton.classList.remove('hide');
+                scoreContainer.classList.remove('hide');
+                scoreElement.innerText = score;
+            }
+        }
+
+        function setStatusClass(element, correct) {
+            clearStatusClass(element);
+            if (correct) {
+                element.classList.add('correct');
+            } else {
+                element.classList.add('wrong');
+            }
+        }
+
+        function clearStatusClass(element) {
+            element.classList.remove('correct');
+            element.classList.remove('wrong');
+        }
+
+        const questions = [
+            {
+                question: 'What is name of luffy crew?',
+                answers: [
+                    { text: 'Strawhat', correct: true },
+                    { text: 'redhaired', correct: false },
+                    { text: 'whitebeard', correct: false},
+                    { text: 'blackbeard', correct: false }
+                ]
+            },
+            {
+                question: 'Who wrote "Dragon ball?',
+                answers: [
+                    { text: 'Akira toriyama', correct: true },
+                    { text: 'J.K. Rowling', correct: false },
+                    { text: 'Ernest Hemingway', correct: false },
+                    { text: 'Mark Twain', correct: false }
+                ]
+            },
+            {
+                question: 'Who is most powerful character in anime histroy?',
+                answers: [
+                    { text: 'Goku', correct: false },
+                    { text: 'Vegeta', correct: false },
+                    { text: 'A B and D', correct: true },
+                    { text: 'Lord Beerus', correct: false }
+                ]
+            },
+            {
+                question: 'Who is best anime character of all time?',
+                answers: [
+                    { text: 'Eren Jeager', correct: true },
+                    { text: 'Saitama', correct: false },
+                    { text: 'Tanjiro', correct: false },
+                    { text: 'Aizen', correct: false }
+                ]
+            },
+            {
+                question: 'Which is best anime in 2024?',
+                answers: [
+                    { text: 'Kaizu no 8', correct: true },
+                    { text: 'Solo levling', correct: false },
+                    { text: 'Wind breaker', correct: false },
+                    { text: 'A and C', correct: false }
+                ]
+            },
+            {
+                question: 'Who is goat of marvel?',
+                answers: [
+                    { text: 'Iron man', correct: true },
+                    { text: 'Captian America', correct: false },
+                    { text: 'Hulk', correct: false},
+                    { text: 'Winter solider', correct: false }
+                ]
+            },
+            {
+                question: 'Who is best female character in anime ? ',
+                answers: [
+                    { text: 'Mikasa', correct: true },
+                    { text: 'Hinata', correct: false },
+                    { text: 'Bulma', correct: false },
+                    { text: 'Shasha brown', correct: false }
+                ]
+            },
+            {
+                question: 'How many people eren killed?',
+                answers: [
+                    { text: '100000', correct: false },
+                    { text: '1000000', correct: false },
+                    { text: 'No one can be counted', correct: true },
+                    { text: '10000000', correct: false }
+                ]
+            },
+            {
+                question: 'Best love story of anime ?',
+                answers: [
+                    { text: 'Naruto&Hinata', correct: false },
+                    { text: 'Vegeta&Bulma', correct: false },
+                    { text: 'Eremika', correct: true },
+                    { text: 'Todo&Yuji', correct: false }
+                ]
+            },
+            {
+                question: 'Who is strongest character in one piece?',
+                answers: [
+                    { text: 'Shanks', correct: true },
+                    { text: 'Blackbeard', correct: false },
+                    { text: 'Whitebeard', correct: false },
+                    { text: 'Zoro', correct: false }
+                ]
+            }
+        ];
+    </script>
+</body>
+</html>
